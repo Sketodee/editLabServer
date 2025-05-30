@@ -37,7 +37,7 @@ export const sendEmail = async (userEmail :string, otp: string) => {
         const mailOptions = {
             from: senderEmail, // Sender address
             to: userEmail, // List of recipients
-            subject: 'Your Martech OTP', // Subject line
+            subject: 'Your EditLab OTP', // Subject line
             html: welcomeEmailTemplate(userEmail, otp), // Plain text body 
         };
 

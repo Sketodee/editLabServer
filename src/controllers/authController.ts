@@ -144,7 +144,7 @@ const authController = {
         res.status(404).json({
           success: false,
           message: "User not found",
-          error: "No user found with this email",
+          error: "No user found with this email ooo",
           data: null,
         });
         return;
@@ -176,9 +176,6 @@ const authController = {
                     data: null,
                 });
                 return;
-
-      // const decryptOtp = decryptToObject(encryptedOtp);
-      // console.log(decryptOtp);
 
     } catch (error:any) {
       res.status(500).json({
