@@ -7,8 +7,8 @@ import { Op } from "sequelize";
 const userController = {
   async createUser(req: Request, res: Response<ApiResponse>): Promise<void> {
     try {
-      const { email, userType } = req.body;
-      const errors = validateUserData({ email, userType });
+      const { email, userType, provider, providerId } = req.body;
+      const errors = validateUserData({ email, userType, provider });
 
       if (errors.length > 0) {
         res.status(400).json({
@@ -38,7 +38,7 @@ const userController = {
         return;
       }
 
-      await UserModel.create({ email, userType });
+      await UserModel.create({ email, userType, provider, providerId });
 
       res.status(201).json({
         success: true,

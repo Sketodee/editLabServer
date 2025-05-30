@@ -3,7 +3,7 @@ import { validateLoginData } from "../config/validators";
 import { ApiResponse } from "../types/appScopeTypes";
 import { UserModel } from "../model/User";
 import { Op } from "sequelize";
-import { decryptToObject, encryptObject } from "../utils/helperFunctions";
+import { decryptToObject, encryptObject, sendEmail } from "../utils/helperFunctions";
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -167,7 +167,7 @@ const authController = {
             );
 
       // Send OTP to user's email
-    //   const emailSent = await sendEmail(user.email, user.fullName, otp.toString()); 
+      const emailSent = await sendEmail(user.email,  otp.toString()); 
 
         res.status(200).json({
                     success: true,

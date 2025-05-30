@@ -9,3 +9,9 @@ export enum UserType {
   error?: string | null;
   data?: any;
 };
+
+export enum AllowedProviders {
+  GOOGLE = 'google',
+  APPLE = 'apple',
+  CUSTOM = 'custom', // For custom providers
+}
