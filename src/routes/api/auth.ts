@@ -6,6 +6,9 @@ const router = express.Router();
 router.route('/login')
     .post(authController.login);
 
+    router.route('/loginwithgoogle')
+    .post(authController.loginWithGoogle);
+
 router.route('generaterefreshtoken')
     .post(authController.generateRefreshToken); 
 
