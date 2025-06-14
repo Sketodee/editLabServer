@@ -9,7 +9,8 @@ router.route('/create')
     .post(authController.createUser);
 
 router.route('/test')
-    .get(verifyRoles(UserType.USER), testController.testEndpoint);
+    .post(verifyRoles(UserType.ADMIN), testController.testEndpoint);
+    // .post(testController.testEndpoint);
 
 
     export default router;

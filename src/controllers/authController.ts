@@ -82,7 +82,7 @@ const authController = {
                     }
                 },
                 secret,
-                { 'expiresIn': '300s' }
+                { 'expiresIn': '3600s' }
             );
 
             const refreshToken = jwt.sign(
@@ -161,7 +161,7 @@ const authController = {
                     }
                 },
                 secret,
-                { 'expiresIn': '300s' }
+                { 'expiresIn': '3600s' }
             );
 
             const refreshToken = jwt.sign(

@@ -41,7 +41,7 @@ const pluginController = {
             await PluginModel.create({ name, description, iconUrl, imageUrl, subDescriptions, windowsFile, macOsFile })
             res.status(201).json({
                 success: true,
-                message: 'User created successfully',
+                message: 'Plugin created successfully',
                 error: null,
                 data: null,
             });
