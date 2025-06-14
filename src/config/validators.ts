@@ -63,3 +63,73 @@ export const validateLoginData = ({
 
   return errors;
 };
+
+export const validatePluginData = ({
+  name,
+  description,
+  iconUrl,
+  imageUrl,
+  subDescriptions,
+  windowsFile,
+  macOsFile,
+}: {
+  name: string;
+  description: string;
+  iconUrl: string; 
+  imageUrl: string;
+  subDescriptions: Array<{ title: string; description: string }>;
+  windowsFile: string;
+  macOsFile: string;
+}): string[] => {
+  const errors: string[] = [];
+
+  // Name validation
+  if (!name || name.trim() === '') {
+    errors.push('Name is required.');
+  }
+
+  // Description validation
+  if (!description || description.trim() === '') {
+    errors.push('Description is required.');
+  }
+
+  // Image URL validation
+  const urlRegex = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i;
+  if (!imageUrl || imageUrl.trim() === '') {
+    errors.push('Image URL is required.');
+  } else if (!urlRegex.test(imageUrl)) {
+    errors.push('Invalid image URL format.');
+  }
+
+    if (!iconUrl || iconUrl.trim() === '') {
+    errors.push('Image URL is required.');
+  } else if (!urlRegex.test(iconUrl)) {
+    errors.push('Invalid image URL format.');
+  }
+
+  // subDescriptions validation
+  if (!Array.isArray(subDescriptions) || subDescriptions.length === 0) {
+    errors.push('At least one subDescription is required.');
+  } else {
+    subDescriptions.forEach((sub, index) => {
+      if (!sub.title || sub.title.trim() === '') {
+        errors.push(`SubDescription #${index + 1} title is required.`);
+      }
+      if (!sub.description || sub.description.trim() === '') {
+        errors.push(`SubDescription #${index + 1} description is required.`);
+      }
+    });
+  }
+
+  // Windows file validation
+  if (!windowsFile || windowsFile.trim() === '') {
+    errors.push('Windows file is required.');
+  }
+
+  // macOS file validation
+  if (!macOsFile || macOsFile.trim() === '') {
+    errors.push('macOS file is required.');
+  }
+
+  return errors;
+};

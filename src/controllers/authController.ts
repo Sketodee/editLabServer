@@ -222,7 +222,7 @@ const authController = {
 
             if (!user) {
                 res.status(404).json({
-                    success: false,
+                    success: false, 
                     message: "User not found",
                     error: "No user found with this email ooo",
                     data: null,

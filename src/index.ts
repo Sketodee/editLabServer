@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 import userRoute from './routes/api/user';
 import authRoute from './routes/api/auth';
+import pluginRoute from './routes/api/plugin'
 
 //connect to MongoDb
 connectDB()
@@ -38,6 +39,7 @@ app.use('/api/auth', authRoute);
 
 // app.use(verifyJWT)
 app.use('/api/user', userRoute)
+app.use('/api/plugin', pluginRoute)
 
 //custom error handler 
 app.use(errorHandler)
