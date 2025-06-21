@@ -40,7 +40,7 @@ const userController = {
 
       await UserModel.create({ email, userType, provider, providerId });
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         message: 'User created successfully',
         error: null,

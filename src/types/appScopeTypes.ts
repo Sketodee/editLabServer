@@ -3,6 +3,17 @@ export enum UserType {
     USER = 1,
   }
 
+  export enum PluginType {
+    PREMIEREPRO = 'premierepro',
+    AFTEREFFECTS = 'aftereffects',
+  }
+
+  // Platform enum
+export enum Platform {
+  WINDOWS = 'windows',
+  MAC = 'mac'
+}
+
   export type ApiResponse = {
   success: boolean;
   message: string;

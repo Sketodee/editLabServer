@@ -8,9 +8,9 @@ router.route('/createplugin')
 .post(verifyRoles(UserType.ADMIN), pluginController.createPlugin)
 
 router.route('/updateplugin')
-.post(verifyRoles(UserType.USER), pluginController.updatePlugin)
+.post(verifyRoles(UserType.ADMIN), pluginController.updatePlugin)
 
 router.route('/getallplugins')
-.post(pluginController.getAllPlugins)
+.get(pluginController.getAllPlugins)
 
 export default router
