@@ -1,3 +1,4 @@
+import { AffiliateStatus, PaymentMethod } from "../model/Affiliate";
 import { AllowedProviders, Platform, PluginType, UserType } from "../types/appScopeTypes";
 
 export const validateUserData = ({
@@ -337,4 +338,59 @@ export const validatePluginWithVersionsData = ({
 const isValidVersionFormat = (version: string): boolean => {
   const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
   return semverRegex.test(version);
+};
+
+export const validateAffiliateApplyData = ({
+  paymentMethod,
+  paymentDetails,
+}: {
+  paymentMethod: PaymentMethod;
+  paymentDetails: string;
+}): string[] => {
+  const errors: string[] = [];
+
+  // PaymentMethod validation
+  const validMethods = Object.values(PaymentMethod);
+  if (!paymentMethod) {
+    errors.push('Payment method is required.');
+  } else if (!validMethods.includes(paymentMethod)) {
+    errors.push(`Invalid payment method. Allowed values: ${validMethods.join(', ')}.`);
+  }
+
+  // PaymentDetails validation
+  if (!paymentDetails || typeof paymentDetails !== 'string' || paymentDetails.trim() === '') {
+    errors.push('Payment details must be a non-empty string.');
+  }
+
+  return errors;
+};
+
+export const validateAffiliateUpdateData = ({
+  status,
+  commissionRate,
+}: {
+  status: AffiliateStatus;
+  commissionRate: number;
+}): string[] => {
+  const errors: string[] = [];
+
+  // Status validation
+  const allowedStatuses = Object.values(AffiliateStatus);
+  if (!status) {
+    errors.push('Status is required.');
+  } else if (!allowedStatuses.includes(status)) {
+    errors.push(`Invalid status. Allowed values: ${allowedStatuses.join(', ')}.`);
+  }
+
+  // Commission rate validation (only if provided)
+  if (commissionRate !== undefined) {
+    if (typeof commissionRate !== 'number' || isNaN(commissionRate)) {
+      errors.push('Commission rate must be a valid number.');
+    } else if (commissionRate < 0 || commissionRate > 100) {
+      errors.push('Commission rate must be between 0 and 100.');
+    }
+  }
+
+
+  return errors;
 };

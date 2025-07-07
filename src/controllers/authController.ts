@@ -6,7 +6,6 @@ import { Op } from "sequelize";
 import { decryptToObject, encryptObject, sendEmail } from "../utils/helperFunctions";
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { OAuth2Client } from 'google-auth-library';
 dotenv.config();
 
 
@@ -82,7 +81,7 @@ const authController = {
                     }
                 },
                 secret,
-                { 'expiresIn': '3600s' }
+                { 'expiresIn': '1d' }
             );
 
             const refreshToken = jwt.sign(
@@ -161,7 +160,7 @@ const authController = {
                     }
                 },
                 secret,
-                { 'expiresIn': '3600s' }
+                { 'expiresIn': '1d' }
             );
 
             const refreshToken = jwt.sign(

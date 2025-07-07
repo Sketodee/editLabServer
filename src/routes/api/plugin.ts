@@ -13,4 +13,7 @@ router.route('/updateplugin')
 router.route('/getallplugins')
 .get(pluginController.getAllPlugins)
 
+router.route('/getPluginWithVersions/:id')
+.get(pluginController.getPluginWithVersions)
+
 export default router

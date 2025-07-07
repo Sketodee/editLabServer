@@ -4,6 +4,7 @@ import { validatePluginData, validatePluginWithVersionsData } from "../config/va
 import { PluginModel, VersionModel } from "../model/Plugin";
 import { Op } from "sequelize";
 import db from "../config/database-config";
+import { extractReferralCode } from "../utils/referrralUtils";
 
 const pluginController = {
     async createPlugin(req: Request, res: Response<ApiResponse>): Promise<void> {
@@ -207,73 +208,126 @@ const pluginController = {
     },
 
     async getAllPlugins(req: Request, res: Response<ApiResponse>): Promise<void> {
-    try {
-        // Extract pagination parameters from query string
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-        const offset = (page - 1) * limit;
+        try {
+            // Extract pagination parameters from query string
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const offset = (page - 1) * limit;
 
-        // Extract filter parameters
-        const type = req.query.type as string;
-        const filter = req.query.filter as string;
+            // Extract filter parameters
+            const type = req.query.type as string;
+            const filter = req.query.filter as string;
 
-        // Build where clause based on query parameters
-        const whereClause: any = {};
+            // Build where clause based on query parameters
+            const whereClause: any = {};
 
-        // Filter by plugin type if provided
-        if (type && type.trim() !== '') {
-            whereClause.pluginType = type.trim();
-        }
-
-        // Filter by name (case-insensitive) if provided
-        if (filter && filter.trim() !== '') {
-            whereClause.name = {
-                [Op.iLike]: `%${filter.trim()}%`
-            };
-        }
-
-        // Count total plugins with filters applied
-        const totalPlugins = await PluginModel.count({
-            where: whereClause
-        });
-
-        // Fetch paginated results without versions
-        const plugins = await PluginModel.findAll({
-            where: whereClause,
-            offset,
-            limit,
-            order: [["createdAt", "DESC"]],
-            // Explicitly exclude versions to keep response light
-            attributes: {
-                exclude: [] // You can exclude specific fields here if needed
+            // Filter by plugin type if provided
+            if (type && type.trim() !== '') {
+                whereClause.pluginType = type.trim();
             }
-        });
 
-        res.status(200).json({
-            success: true,
-            message: "Plugins fetched successfully",
-            error: null,
-            data: {
-                currentPage: page,
-                totalPages: Math.ceil(totalPlugins / limit),
-                totalItems: totalPlugins,
-                items: plugins,
-                filters: {
-                    type: type || null,
-                    filter: filter || null,
-                    appliedFilters: Object.keys(whereClause).length
+            // Filter by name (case-insensitive) if provided
+            if (filter && filter.trim() !== '') {
+                whereClause.name = {
+                    [Op.iLike]: `%${filter.trim()}%`
+                };
+            }
+
+            // Count total plugins with filters applied
+            const totalPlugins = await PluginModel.count({
+                where: whereClause
+            });
+
+            // Fetch paginated results without versions
+            const plugins = await PluginModel.findAll({
+                where: whereClause,
+                offset,
+                limit,
+                order: [["createdAt", "DESC"]],
+                // Explicitly exclude versions to keep response light
+                attributes: {
+                    exclude: [] // You can exclude specific fields here if needed
                 }
-            },
-        });
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Internal server error",
-            error: error.message,
-            data: null,
-        });
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "Plugins fetched successfully",
+                error: null,
+                data: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalPlugins / limit),
+                    totalItems: totalPlugins,
+                    items: plugins,
+                    filters: {
+                        type: type || null,
+                        filter: filter || null,
+                        appliedFilters: Object.keys(whereClause).length
+                    }
+                },
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: "Internal server error",
+                error: error.message,
+                data: null,
+            });
+        }
+    },
+
+    async getPluginWithVersions(req: Request, res: Response<ApiResponse>): Promise<void> {
+        try {
+            const { id } = req.params;
+            // Validate plugin ID
+            if (!id || isNaN(parseInt(id))) {
+                res.status(400).json({
+                    success: false,
+                    message: "Invalid plugin ID",
+                    error: "Plugin ID must be a valid number",
+                    data: null,
+                });
+                return;
+            }
+
+            // Fetch plugin with all versions
+           const plugin = await PluginModel.findByPk(id, {
+    include: [{
+        model: VersionModel,
+        as: 'versions'
+    }],
+    order: [
+        [{ model: VersionModel, as: 'versions' }, 'releaseDate', 'DESC']
+    ]
+});
+
+            if (!plugin) {
+                res.status(404).json({
+                    success: false,
+                    message: "Plugin not found",
+                    error: "No plugin found with the provided ID",
+                    data: null,
+                });
+                return;
+            }
+
+            res.status(200).json({
+                success: true,
+                message: "Plugin with versions fetched successfully",
+                error: null,
+                data: plugin,
+            });
+
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: "Internal server error",
+                error: error.message,
+                data: null,
+            });
+        }
     }
-}
+
 }
 
 export default pluginController
