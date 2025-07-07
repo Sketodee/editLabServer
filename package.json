@@ -23,9 +23,11 @@
     "nodemailer": "^7.0.3",
     "pg": "^8.16.0",
     "sequelize": "^6.37.7",
+    "stripe": "^18.2.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.21",
