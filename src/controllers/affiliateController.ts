@@ -1,5 +1,7 @@
+import { Op } from "sequelize";
 import { validateAffiliateApplyData, validateAffiliateUpdateData } from "../config/validators";
 import AffiliateModel, { AffiliateStatus } from "../model/Affiliate";
+import { UserModel } from "../model/User";
 import { AffiliateService } from "../services/affiliateService";
 import { ApiResponse } from "../types/appScopeTypes";
 import { Request, Response } from "express";
@@ -12,6 +14,7 @@ interface CustomRequest extends Request {
 
 export const affiliateController = {
   async applyAffiliate(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
+    console.log("hitr")
     try {
       if (!req.id) {
         res.status(400).json({
@@ -23,6 +26,7 @@ export const affiliateController = {
         return;
       }
       const { paymentMethod, paymentDetails } = req.body;
+      console.log(req.body)
       const errors = validateAffiliateApplyData({
         paymentMethod, paymentDetails
       })
@@ -107,7 +111,7 @@ export const affiliateController = {
           commissionRate: existingAffiliate.commissionRate
         }
       });
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Verify affiliate status error:', error);
 
       if (error.message === 'Affiliate account not found') {
@@ -248,87 +252,59 @@ export const affiliateController = {
     }
   },
 
+  // async updateAffiliateStatus(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
+  //   try {
+  //     const { affiliateId } = req.params;
+  //     const { status, commissionRate } = req.body;
 
-  async updateAffiliateStatus(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
-    try {
-      const { affiliateId } = req.params;
-      const { status, commissionRate } = req.body;
+  //     const errors = validateAffiliateUpdateData({
+  //       status, commissionRate
+  //     })
 
-      const errors = validateAffiliateUpdateData({
-        status, commissionRate
-      })
-
-      if (errors.length > 0) {
-        res.status(400).json({
-          success: false,
-          message: 'Validation failed',
-          error: errors.join(', '),
-          data: null,
-        });
-        return;
-      }
-
-      const affiliate = await AffiliateService.updateAffiliateStatus(
-        parseInt(affiliateId),
-        status,
-        Number(req.id),
-        commissionRate
-      );
-
-      res.status(200).json({
-        success: true,
-        message: `Affiliate ${status} successfully`,
-        data: {
-          id: affiliate.id,
-          status: affiliate.status,
-          commissionRate: affiliate.commissionRate,
-          approvedAt: affiliate.approvedAt
-        }
-      });
-    } catch (error: any) {
-      console.error('Update affiliate status error:', error);
-
-      if (error.message === 'Affiliate not found') {
-        res.status(404).json({
-          success: false,
-          message: error.message
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update affiliate status'
-      });
-    }
-  },
-
-  /**
-   * Get all affiliates (Admin only)
-   */
-  //   async getAllAffiliates(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
-  //     try {
-  //       const { page = 1, limit = 10, status } = req.query;
-
-  //       const affiliates = await AffiliateService.getAllAffiliates(
-  //         parseInt(page as string),
-  //         parseInt(limit as string),
-  //         status as AffiliateStatus
-  //       );
-
-  //       res.json({
-  //         success: true,
-  //         data: affiliates
-  //       });
-  //     } catch (error: any) {
-  //       console.error('Get all affiliates error:', error);
-  //       res.status(500).json({
+  //     if (errors.length > 0) {
+  //       res.status(400).json({
   //         success: false,
-  //         message: 'Failed to fetch affiliates'
+  //         message: 'Validation failed',
+  //         error: errors.join(', '),
+  //         data: null,
   //       });
+  //       return;
   //     }
-  //   }
 
+  //     const affiliate = await AffiliateService.updateAffiliateStatus(
+  //       parseInt(affiliateId),
+  //       status,
+  //       Number(req.id),
+  //       commissionRate
+  //     );
+
+  //     res.status(200).json({
+  //       success: true,
+  //       message: `Affiliate ${status} successfully`,
+  //       data: {
+  //         id: affiliate.id,
+  //         status: affiliate.status,
+  //         commissionRate: affiliate.commissionRate,
+  //         approvedAt: affiliate.approvedAt
+  //       }
+  //     });
+  //   } catch (error: any) {
+  //     console.error('Update affiliate status error:', error);
+
+  //     if (error.message === 'Affiliate not found') {
+  //       res.status(404).json({
+  //         success: false,
+  //         message: error.message
+  //       });
+  //       return;
+  //     }
+
+  //     res.status(500).json({
+  //       success: false,
+  //       message: 'Failed to update affiliate status'
+  //     });
+  //   }
+  // },
 
   async trackReferralRedirect(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
     try {
@@ -358,6 +334,330 @@ export const affiliateController = {
     } catch (error: any) {
       console.error('Track referral redirect error:', error);
       res.redirect('/'); // Fallback redirect
+    }
+  },
+
+  async getPendingCount(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const pendingCount = await AffiliateModel.count({
+        where: {
+          status: AffiliateStatus.PENDING
+        }
+      });
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Pending affiliate count retrieved successfully',
+        data: {
+          pendingCount
+        }
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      console.error('Get pending count error:', error);
+
+      const response: ApiResponse = {
+        success: false,
+        message: 'Failed to retrieve pending count',
+        error: error.message
+      };
+
+      res.status(500).json(response);
+    }
+  },
+
+  async getAllAffiliates(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        status,
+        search
+      } = req.query;
+
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const offset = (pageNum - 1) * limitNum;
+
+      // Build where clause
+      const whereClause: any = {};
+
+      if (status && status !== 'all') {
+        whereClause.status = status;
+      }
+
+      // Build include clause for user search
+      const includeClause: any = {
+        model: UserModel,
+        as: 'User',
+        attributes: ['id', 'email', 'createdAt']
+      };
+
+      if (search) {
+        includeClause.where = {
+          email: {
+            [Op.iLike]: `%${search}%` // Case-insensitive search
+          }
+        };
+      }
+
+      const { count, rows } = await AffiliateModel.findAndCountAll({
+        where: whereClause,
+        include: [
+          includeClause,
+          {
+            model: UserModel,
+            as: 'ApprovedByUser',
+            attributes: ['id', 'email'],
+            required: false
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        limit: limitNum,
+        offset,
+        distinct: true // Important for accurate count with includes
+      });
+
+      const totalPages = Math.ceil(count / limitNum);
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Affiliates retrieved successfully',
+        data: {
+          affiliates: rows,
+          pagination: {
+            currentPage: pageNum,
+            totalPages,
+            totalItems: count,
+            itemsPerPage: limitNum,
+            hasNextPage: pageNum < totalPages,
+            hasPrevPage: pageNum > 1
+          },
+          filters: {
+            status: status || 'all',
+            search: search || null
+          }
+        }
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      console.error('Get all affiliates error:', error);
+
+      const response: ApiResponse = {
+        success: false,
+        message: 'Failed to retrieve affiliates',
+        error: error.message
+      };
+
+      res.status(500).json(response);
+    }
+  }, 
+
+  async updateAffiliateStatus(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const { affiliateId } = req.params;
+      const { status, commissionRate} = req.body;
+
+      if (!Object.values(AffiliateStatus).includes(status)) {
+        const response: ApiResponse = {
+          success: false,
+          message: 'Invalid status value',
+          error: 'Status must be one of: pending, approved, suspended, rejected'
+        };
+        
+        res.status(400).json(response);
+        return;
+      }
+
+      const affiliate = await AffiliateModel.findByPk(affiliateId, {
+        include: [
+          {
+            model: UserModel,
+            as: 'User',
+            attributes: ['id', 'email']
+          }
+        ]
+      });
+
+      if (!affiliate) {
+        const response: ApiResponse = {
+          success: false,
+          message: 'Affiliate not found',
+          error: 'No affiliate found with the provided ID'
+        };
+        
+        res.status(404).json(response);
+        return;
+      }
+
+      // Prepare update data
+      const updateData: any = { status };
+      
+      if (commissionRate !== undefined && commissionRate !== null) {
+        updateData.commissionRate = commissionRate;
+      }
+
+      if (status === AffiliateStatus.APPROVED) {
+        updateData.approvedAt = new Date();
+        updateData.approvedBy = req.id; // Assuming req.user is set by auth middleware
+      }
+
+      await affiliate.update(updateData);
+
+      // Reload to get updated data
+      await affiliate.reload({
+        include: [
+          {
+            model: UserModel,
+            as: 'User',
+            attributes: ['id', 'email']
+          },
+          {
+            model: UserModel,
+            as: 'ApprovedByUser',
+            attributes: ['id', 'email'],
+            required: false
+          }
+        ]
+      });
+
+      const response: ApiResponse = {
+        success: true,
+        message: `Affiliate ${status} successfully`,
+        data: {
+          affiliate
+        }
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      console.error('Update affiliate status error:', error);
+      
+      const response: ApiResponse = {
+        success: false,
+        message: 'Failed to update affiliate status',
+        error: error.message
+      };
+
+      res.status(500).json(response);
+    }
+  }, 
+
+  async getAffiliateStats(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const [
+        totalCount,
+        pendingCount,
+        approvedCount,
+        suspendedCount,
+        rejectedCount
+      ] = await Promise.all([
+        AffiliateModel.count(),
+        AffiliateModel.count({ where: { status: AffiliateStatus.PENDING } }),
+        AffiliateModel.count({ where: { status: AffiliateStatus.APPROVED } }),
+        AffiliateModel.count({ where: { status: AffiliateStatus.SUSPENDED } }),
+        AffiliateModel.count({ where: { status: AffiliateStatus.REJECTED } })
+      ]);
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Affiliate statistics retrieved successfully',
+        data: {
+          total: totalCount,
+          pending: pendingCount,
+          approved: approvedCount,
+          suspended: suspendedCount,
+          rejected: rejectedCount,
+          breakdown: {
+            pending: pendingCount,
+            approved: approvedCount,
+            suspended: suspendedCount,
+            rejected: rejectedCount
+          }
+        }
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      console.error('Get affiliate stats error:', error);
+      
+      const response: ApiResponse = {
+        success: false,
+        message: 'Failed to retrieve affiliate statistics',
+        error: error.message
+      };
+
+      res.status(500).json(response);
+    }
+  }, 
+
+  async bulkUpdateStatus(req: CustomRequest, res: Response<ApiResponse>): Promise<void> {
+     try {
+      const { affiliateIds, status, commissionRate } = req.body;
+
+      if (!Array.isArray(affiliateIds) || affiliateIds.length === 0) {
+        const response: ApiResponse = {
+          success: false,
+          message: 'Invalid affiliate IDs',
+          error: 'affiliateIds must be a non-empty array'
+        };
+        
+        res.status(400).json(response);
+        return;
+      }
+
+      if (!Object.values(AffiliateStatus).includes(status)) {
+        const response: ApiResponse = {
+          success: false,
+          message: 'Invalid status value',
+          error: 'Status must be one of: pending, approved, suspended, rejected'
+        };
+        
+        res.status(400).json(response);
+        return;
+      }
+
+      const updateData: any = { status };
+      
+      if (commissionRate !== undefined && commissionRate !== null) {
+        updateData.commissionRate = commissionRate;
+      }
+
+      if (status === AffiliateStatus.APPROVED) {
+        updateData.approvedAt = new Date();
+        updateData.approvedBy = req.id;
+      }
+
+      const [updatedCount] = await AffiliateModel.update(updateData, {
+        where: {
+          id: {
+            [Op.in]: affiliateIds
+          }
+        }
+      });
+
+      const response: ApiResponse = {
+        success: true,
+        message: `${updatedCount} affiliates updated successfully`,
+        data: {
+          updatedCount,
+          status
+        }
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      console.error('Bulk update status error:', error);
+      
+      const response: ApiResponse = {
+        success: false,
+        message: 'Failed to bulk update affiliate statuses',
+        error: error.message
+      };
+
+      res.status(500).json(response);
     }
   }
 }
