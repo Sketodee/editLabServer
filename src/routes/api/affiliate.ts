@@ -19,6 +19,20 @@ router.route('/verify')
 router.route('/admin/update/:affiliateId')
   .post(verifyRoles(UserType.ADMIN), affiliateController.updateAffiliateStatus);
 
+
+router.route('/admin/getpendingaffiliatecount')
+  .get(verifyRoles(UserType.ADMIN), affiliateController.getPendingCount);
+
+  router.route('/admin/getallaffiliates')
+  .get(verifyRoles(UserType.ADMIN), affiliateController.getAllAffiliates);
+
+  router.route('/admin/getaffiliatestats')
+  .get(verifyRoles(UserType.ADMIN), affiliateController.getAffiliateStats);
+
+  router.route('/admin/bulkupdatestatus')
+  .post(verifyRoles(UserType.ADMIN), affiliateController.bulkUpdateStatus);
+
+
 router.use(requireAffiliate)
 
 router.route('/dashboard')
