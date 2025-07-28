@@ -28,6 +28,7 @@ export enum AllowedProviders {
 }
 
 export enum SubscriptionPlan {
+  SINGLE= 'single',
   MONTHLY = 'monthly',
   YEARLY = 'yearly'
 }

@@ -50,9 +50,13 @@ export class StripeService {
     }
 
     const customer = await this.createOrGetCustomer(userId, user.email);
-    const priceId = plan === SubscriptionPlan.MONTHLY
+    const priceId = 
+  plan === SubscriptionPlan.SINGLE
+    ? STRIPE_CONFIG.SINGLE_SUBSCRIPTION_PRICE_ID
+    : plan === SubscriptionPlan.MONTHLY
       ? STRIPE_CONFIG.MONTHLY_SUBSCRIPTION_PRICE_ID
       : STRIPE_CONFIG.YEARLY_SUBSCRIPTION_PRICE_ID;
+
 
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
