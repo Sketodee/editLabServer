@@ -20,7 +20,7 @@ router.post('/validate-product-key', subscriptionController.validateProductKey);
 router.get('/product-key/:productKey', subscriptionController.getSubscriptionByProductKey);
 
 // Cancel subscription
-router.delete('/user/:userId/cancel', subscriptionController.cancelSubscription);
+router.post('/user/cancel/:userId/', subscriptionController.cancelSubscription);
 
 // Create billing portal session
 router.post('/user/:userId/billing-portal', subscriptionController.createBillingPortalSession);

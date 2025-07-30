@@ -77,7 +77,8 @@ const subscriptionController = {
         currentPeriodEnd: subscription.currentPeriodEnd,
         trialStart: subscription.trialStart,
         trialEnd: subscription.trialEnd,
-        isTrialing: subscription.status === 'trialing'
+        isTrialing: subscription.status === 'trialing',
+        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
       });
     } catch (error) {
       console.error('Error fetching user subscription:', error);
@@ -106,7 +107,8 @@ const subscriptionController = {
         subscription: validation.subscription ? {
           plan: validation.subscription.plan,
           status: validation.subscription.status,
-          currentPeriodEnd: validation.subscription.currentPeriodEnd
+          currentPeriodEnd: validation.subscription.currentPeriodEnd,
+          willCancel: validation.willCancel
         } : null
       });
     } catch (error) {

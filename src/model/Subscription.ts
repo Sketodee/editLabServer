@@ -25,6 +25,7 @@ export interface SubscriptionModelAttributes {
   productKey: string;
   currentPeriodStart: Date | null;
   currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd?: boolean;
   trialStart?: Date | null;
   trialEnd?: Date | null;
   canceledAt?: Date | null;
@@ -43,6 +44,7 @@ export class SubscriptionModel extends Model<SubscriptionModelAttributes> implem
   public productKey!: string;
   public currentPeriodStart!: Date | null;
   public currentPeriodEnd!: Date | null;
+   public cancelAtPeriodEnd?: boolean;
   public trialStart?: Date | null;
   public trialEnd?: Date | null;
   public canceledAt?: Date | null;
@@ -111,6 +113,10 @@ SubscriptionModel.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    cancelAtPeriodEnd: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
   },
   {
     tableName: "subscriptions",

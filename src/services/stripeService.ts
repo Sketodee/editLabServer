@@ -145,8 +145,14 @@ export class StripeService {
 
     const updateData = {
       status: stripeSubscription.status as SubscriptionStatus,
-      currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+     currentPeriodStart: stripeSubscription.items.data[0].current_period_start && stripeSubscription.items.data[0].current_period_start > 0
+        ? new Date(stripeSubscription.items.data[0].current_period_start * 1000)
+        : null,
+
+      currentPeriodEnd: stripeSubscription.items.data[0].current_period_end && stripeSubscription.items.data[0].current_period_end > 0
+        ? new Date(stripeSubscription.items.data[0].current_period_end * 1000)
+        : null,
+      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end || false,
       canceledAt: stripeSubscription.canceled_at
         ? new Date(stripeSubscription.canceled_at * 1000)
         : null,
@@ -160,7 +166,10 @@ export class StripeService {
    * Cancel subscription
    */
   static async cancelSubscription(subscriptionId: string): Promise<void> {
-    await stripe.subscriptions.cancel(subscriptionId);
+    // await stripe.subscriptions.cancel(subscriptionId);
+    await stripe.subscriptions.update(subscriptionId, {
+    cancel_at_period_end: true,
+  });
   }
 
   /**

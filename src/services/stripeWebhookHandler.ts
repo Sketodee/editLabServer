@@ -93,6 +93,7 @@ export class StripeWebhookHandler {
    * Handle subscription deleted/canceled
    */
   private static async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+    console.log('Subscription deleted:', subscription.id);
     const subscriptionRecord = await SubscriptionModel.findOne({
       where: { stripeSubscriptionId: subscription.id }
     });

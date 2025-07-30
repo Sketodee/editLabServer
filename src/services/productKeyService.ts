@@ -27,6 +27,7 @@ static generateProductKey(): string {
     subscription?: SubscriptionModel;
     expiresAt?: Date | null;
     status?: string;
+     willCancel?: boolean;
   }> {
     try {
       const subscription = await SubscriptionModel.findOne({
@@ -45,12 +46,16 @@ static generateProductKey(): string {
         SubscriptionStatus.TRIALING
       ].includes(subscription.status);
 
+      // Check if subscription is scheduled for cancellation
+    const willCancel = subscription.cancelAtPeriodEnd;
+
       if (isExpired || !isActive) {
         return {
           isValid: false,
           subscription,
           expiresAt: subscription.currentPeriodEnd,
-          status: isExpired ? 'Expired' : 'Inactive'
+          status: isExpired ? 'Expired' : 'Inactive', 
+          willCancel
         };
       }
 
@@ -58,7 +63,8 @@ static generateProductKey(): string {
         isValid: true,
         subscription,
         expiresAt: subscription.currentPeriodEnd,
-        status: 'Active'
+        status: willCancel ? 'Active (Canceling at period end)' : 'Active',
+      willCancel
       };
     } catch (error) {
       console.error('Error validating product key:', error);
