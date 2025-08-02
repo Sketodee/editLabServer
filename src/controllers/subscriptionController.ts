@@ -6,57 +6,54 @@ import { StripeWebhookHandler } from "../services/stripeWebhookHandler";
 import { SubscriptionModel } from "../model/Subscription";
 
 const subscriptionController = {
-    async createCheckoutSession(req: Request, res: Response<ApiResponse>): Promise<void> {
-        try {
-            const { userId, plan, successUrl, cancelUrl } = req.body;
+  async createCheckoutSession(req: Request, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const { userId, plan, successUrl, cancelUrl } = req.body;
 
-            if (!userId || !plan) {
-                res.status(400).json({
-                    success: false,
-                    message: 'User ID and plan are required',
-                    error: null,
-                    data: null,
-                });
-                return;
-            }
+      if (!userId || !plan) {
+        res.status(400).json({
+          success: false,
+          message: 'User ID and plan are required',
+          error: null,
+          data: null,
+        });
+        return;
+      }
 
-            if (!Object.values(SubscriptionPlan).includes(plan)) {
-                res.status(400).json({
-                    success: false,
-                    message: 'Invalid subscription plan',
-                    error: null,
-                    data: null,
-                });
-                return;
-            }
+      if (!Object.values(SubscriptionPlan).includes(plan)) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid subscription plan',
+          error: null,
+          data: null,
+        });
+        return;
+      }
 
-             const session = await StripeService.createCheckoutSession(
-                userId,
-                plan, successUrl, cancelUrl
-            );
+      const session = await StripeService.createCheckoutSession(
+        userId,
+        plan, successUrl, cancelUrl
+      );
 
-            res.status(200).json({
-                success: true,
-                message: 'Checkout session created successfully',
-                error: null,
-                data: session,
-            });
+      res.status(200).json({
+        success: true,
+        message: 'Checkout session created successfully',
+        error: null,
+        data: session,
+      });
 
-        }
-        catch (error) {
-            console.error('Error creating subscription:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Failed to create subscription',
-                error: error instanceof Error ? error.message : 'Unknown error',
-                data: null,
-            });
-        }
-    }, 
+    }
+    catch (error) {
+      console.error('Error creating subscription:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create subscription',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        data: null,
+      });
+    }
+  },
 
-      /**
-   * Get user subscription details
-   */
   async getUserSubscription(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
@@ -79,6 +76,7 @@ const subscriptionController = {
         trialEnd: subscription.trialEnd,
         isTrialing: subscription.status === 'trialing',
         cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+        pluginDowbnloadCount: subscription.pluginDownloadCount,
       });
     } catch (error) {
       console.error('Error fetching user subscription:', error);
@@ -261,14 +259,14 @@ const subscriptionController = {
   async handleWebhook(req: Request, res: Response): Promise<void> {
     try {
       const signature = req.headers['stripe-signature'] as string;
-      
+
       if (!signature) {
         res.status(400).json({ error: 'Missing stripe-signature header' });
         return;
       }
 
       await StripeWebhookHandler.handleWebhook(req.body, signature);
-      
+
       res.json({ received: true });
     } catch (error) {
       console.error('Webhook error:', error);

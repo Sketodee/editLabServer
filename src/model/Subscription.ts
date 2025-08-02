@@ -31,6 +31,7 @@ export interface SubscriptionModelAttributes {
   canceledAt?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
+  pluginDownloadCount?: number;
 }
 
 export class SubscriptionModel extends Model<SubscriptionModelAttributes> implements SubscriptionModelAttributes {
@@ -50,6 +51,7 @@ export class SubscriptionModel extends Model<SubscriptionModelAttributes> implem
   public canceledAt?: Date | null;
   public createdAt?: Date;
   public updatedAt?: Date;
+  public pluginDownloadCount?: number;
 }
 
 SubscriptionModel.init(
@@ -117,6 +119,10 @@ SubscriptionModel.init(
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+    pluginDownloadCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    }
   },
   {
     tableName: "subscriptions",
