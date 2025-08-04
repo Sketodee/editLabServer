@@ -25,11 +25,13 @@ export interface SubscriptionModelAttributes {
   productKey: string;
   currentPeriodStart: Date | null;
   currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd?: boolean;
   trialStart?: Date | null;
   trialEnd?: Date | null;
   canceledAt?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
+  pluginDownloadCount?: number;
 }
 
 export class SubscriptionModel extends Model<SubscriptionModelAttributes> implements SubscriptionModelAttributes {
@@ -43,11 +45,13 @@ export class SubscriptionModel extends Model<SubscriptionModelAttributes> implem
   public productKey!: string;
   public currentPeriodStart!: Date | null;
   public currentPeriodEnd!: Date | null;
+   public cancelAtPeriodEnd?: boolean;
   public trialStart?: Date | null;
   public trialEnd?: Date | null;
   public canceledAt?: Date | null;
   public createdAt?: Date;
   public updatedAt?: Date;
+  public pluginDownloadCount?: number;
 }
 
 SubscriptionModel.init(
@@ -111,6 +115,14 @@ SubscriptionModel.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    cancelAtPeriodEnd: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+    pluginDownloadCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    }
   },
   {
     tableName: "subscriptions",
