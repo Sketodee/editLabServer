@@ -31,6 +31,9 @@ router.put('/user/:userId/change-plan', subscriptionController.changeSubscriptio
 // Check product key expiration
 router.get('/product-key/:productKey/expiration', subscriptionController.checkProductKeyExpiration);
 
+//update plugin download count
+router.post('/updatePluginCount', subscriptionController.updatePluginDownloadCount);
+
 // Stripe webhook endpoint (use raw body middleware)
 // router.post('/webhook', rawBodyMiddleware, subscriptionController.handleWebhook);
 

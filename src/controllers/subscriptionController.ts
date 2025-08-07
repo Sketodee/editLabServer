@@ -76,7 +76,7 @@ const subscriptionController = {
         trialEnd: subscription.trialEnd,
         isTrialing: subscription.status === 'trialing',
         cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-        pluginDowbnloadCount: subscription.pluginDownloadCount,
+        pluginDownloadCount: subscription.pluginDownloadCount,
       });
     } catch (error) {
       console.error('Error fetching user subscription:', error);
@@ -301,6 +301,32 @@ const subscriptionController = {
     } catch (error) {
       console.error('Error fetching user subscriptions:', error);
       res.status(500).json({ error: 'Failed to fetch subscriptions' });
+    }
+  },
+
+  async updatePluginDownloadCount(req: Request, res: Response): Promise<void> {
+    try {
+      const { productKey} = req.body;
+
+      if (!productKey) {
+        res.status(400).json({ error: 'Product key and count are required' });
+        return;
+      }
+
+      const subscription = await ProductKeyService.getSubscriptionByProductKey(productKey);
+
+      if (!subscription) {
+        res.status(404).json({ error: 'Subscription not found' });
+        return;
+      }
+
+      subscription.pluginDownloadCount = (subscription.pluginDownloadCount || 0) + 1;
+      await subscription.save();
+
+      res.json({ message: 'Plugin download count updated successfully', count: subscription.pluginDownloadCount });
+    } catch (error) {
+      console.error('Error updating plugin download count:', error);
+      res.status(500).json({ error: 'Failed to update plugin download count' });
     }
   }
 }
