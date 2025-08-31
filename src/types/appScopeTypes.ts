@@ -55,3 +55,4 @@ export interface AffiliateStats {
     cancelled: number;
   };
 }
+
