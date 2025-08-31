@@ -16,9 +16,11 @@ const PORT = process.env.PORT || 3000;
 import userRoute from './routes/api/user';
 import authRoute from './routes/api/auth';
 import pluginRoute from './routes/api/plugin'
+import pluginPublicRoute from './routes/api/pluginPublic'
 import subscriptionRoute from './routes/api/subscription';
 import subscriptionController from './controllers/subscriptionController';
 import affiliateRoute from './routes/api/affiliate';
+import pluginController from './controllers/pluginController';
 
 //connect to MongoDb
 connectDB()
@@ -46,6 +48,7 @@ app.use(express.json())
 //Route handlers without JWT authorization 
 
 app.use('/api/auth', authRoute);
+app.use('/api/plugin', pluginPublicRoute);
 app.use('/api/subscription', subscriptionRoute);
 
 app.get('/success', (req, res) => {
